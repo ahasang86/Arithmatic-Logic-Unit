@@ -1,0 +1,67 @@
+// Code your design here
+//======================================================
+// 32-bit ALU (Arithmetic Logic Unit)
+//------------------------------------------------------
+// Supports the following operations:
+//   0000 : ADD
+//   0001 : SUB
+//   0010 : AND
+//   0011 : OR
+//   0100 : XOR
+//   0101 : Shift Left Logical
+//   0110 : Shift Right Logical
+//   0111 : Shift Right Arithmetic
+//   1000 : Compare (a < b)
+//------------------------------------------------------
+// Outputs:
+//   result  - 32-bit output
+//   zero    - High when result == 0
+//   carry   - Carry-out for ADD/SUB
+//   overflow- Signed overflow flag
+//======================================================
+
+module alu (
+    input  logic [31:0] a, b,       // ALU operands
+    input  logic [3:0]  op,         // Operation select
+    output logic [31:0] result,     // ALU result
+    output logic zero,              // Zero flag
+    output logic carry,             // Carry flag
+    output logic overflow           // Overflow flag
+);
+
+    logic [32:0] tmp;               // For carry detection
+
+    always_comb begin
+        carry    = 0;
+        overflow = 0;
+
+        case (op)
+            4'b0000: begin // ADD
+                tmp = a + b;
+                result = tmp[31:0];
+                carry = tmp[32];
+                overflow = (a[31] == b[31]) && (result[31] != a[31]);
+            end
+
+            4'b0001: begin // SUB
+                tmp = a - b;
+                result = tmp[31:0];
+                carry = tmp[32];
+                overflow = (a[31] != b[31]) && (result[31] != a[31]);
+            end
+
+            4'b0010: result = a & b;          // AND
+            4'b0011: result = a | b;          // OR
+            4'b0100: result = a ^ b;          // XOR
+            4'b0101: result = a << b[4:0];    // SLL
+            4'b0110: result = a >> b[4:0];    // SRL
+            4'b0111: result = $signed(a) >>> b[4:0]; // SRA
+            4'b1000: result = (a < b) ? 32'd1 : 32'd0; // SLT
+
+            default: result = 32'd0;
+        endcase
+    end
+
+    assign zero = (result == 32'd0);
+
+endmodule

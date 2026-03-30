@@ -1,0 +1,56 @@
+// Code your testbench here
+// or browse Examples
+//======================================================
+// ALU Testbench
+//------------------------------------------------------
+// Tests all ALU operations with sample values.
+// Displays result, carry, zero, and overflow flags.
+//======================================================
+
+`timescale 1ns/1ps
+
+module testbench;
+
+    logic [31:0] a, b;
+    logic [3:0] op;
+    logic [31:0] result;
+    logic zero, carry, overflow;
+
+    alu dut (
+        .a(a), .b(b), .op(op),
+        .result(result),
+        .zero(zero),
+        .carry(carry),
+        .overflow(overflow)
+    );
+  //dump file
+  initial begin
+  $dumpfile("dump.vcd");
+  $dumpvars(1);
+  end
+
+
+    task run_test(input [3:0] t_op, input [31:0] t_a, input [31:0] t_b);
+        begin
+            op = t_op; a = t_a; b = t_b;
+            #10;
+            $display("op=%b a=%0d b=%0d -> result=%0d zero=%b carry=%b ovf=%b",
+                     op, a, b, result, zero, carry, overflow);
+        end
+    endtask
+
+    initial begin
+        run_test(4'b0000, 10, 20);   // ADD
+        run_test(4'b0001, 50, 10);   // SUB
+        run_test(4'b0010, 8'hFF, 8'h0F); // AND
+        run_test(4'b0011, 8'hF0, 8'h0F); // OR
+        run_test(4'b0100, 8'hAA, 8'h55); // XOR
+        run_test(4'b0101, 32'h1, 4); // SLL
+        run_test(4'b0110, 32'h80, 4); // SRL
+        run_test(4'b0111, -32'sd16, 2); // SRA
+        run_test(4'b1000, 5, 10); // SLT
+
+        $finish;
+    end
+
+endmodule
